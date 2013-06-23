@@ -43,6 +43,14 @@ void ewrite_word(word data, int addr){
   EEPROM.write( (byte)(data >> 8), addr + 1 );
 }
 
+void ewrite1(byte data){
+  word addr = get_cur_addr();
+  EEPROM.write(data,addr);
+  addr ++;
+  set_cur_addr(addr);
+  return;
+}
+
 // MAIN PROGRAM
 unsigned long sleep_event_time = 0; // capture time when wake up from sleep
 unsigned long elapsed_time = 0;  // time that have been awake for
