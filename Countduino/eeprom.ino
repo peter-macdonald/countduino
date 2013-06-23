@@ -7,9 +7,6 @@ int init_mem(byte flags){
     set_cur_addr(3);
     EEPROM.write(0,0x42);
   }
-  else {
-    set_cur_addr(get_cur_addr());
-  }
 }
 
 void set_cur_addr(word addr){
@@ -32,21 +29,40 @@ word eread_word(int addr){
 }
 
 void ewrite_word(word data, int addr){
-  EEPROM.write( (byte)(data & 0x0f), addr );
-  EEPROM.write( (byte)(data >> 8), addr + 1 );
+  Serial.print("\n[W] ADDR:");
+  Serial.print(addr,HEX);
+  Serial.print("\tDATA:");
+  Serial.print((byte)(data & 0xff),HEX);
+  Serial.print(", ");
+  Serial.print((byte)(data >> 8),HEX);
+  
+  EEPROM.write(addr, (byte)(data & 0xff));
+  EEPROM.write(addr + 1, (byte)(data >> 8));
 }
 
 void ewrite1(byte data){
   word addr = get_cur_addr();
-  EEPROM.write(data,addr);
+  Serial.print("\n[W] ADDR:");
+  Serial.print(addr,HEX);
+  Serial.print("\tDATA:");
+  Serial.print(data,HEX);
+  
+  EEPROM.write(addr,data);
   addr ++;
   set_cur_addr(addr);
   return;
 }
 
 void edump(){
-  word i = 0;
-  for( i=0; i < get_cur_addr(); i++ )
+  int i = 0;
+  int ending = get_cur_addr();
+  Serial.print("\n\n****DUMPING:****\n");
+  for( i=0; i < ending; i++ ){
+    Serial.print(i,HEX);
+    Serial.print("\t");
     Serial.print(EEPROM.read(i),HEX);
+    Serial.print("\n");
+  }
+  Serial.print("****COMPLETE***\n\n");
   return;
 }

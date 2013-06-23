@@ -1,6 +1,7 @@
 //REPLACE ALL millis() WITH RTC READ EVENTS
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
+#include <EEPROM.h>
 
 #define LED_PIN 13
 #define PIR_PIN 2
@@ -28,13 +29,16 @@ void sleepUntilInterrupt() {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600); 
   Serial.print("SLEEPING");
   pinMode(LED_PIN, OUTPUT);
   pinMode (PIR_PIN, INPUT);
   attachInterrupt(PIR_INT, pin2Interrupt, HIGH);
+ 
   init_mem(0);
-  ewrite1(0xAA);
+  //dump current logs to serial on startup
+  edump();
+  delay(50);
 }
 
 void loop() {
@@ -43,10 +47,11 @@ void loop() {
   
   while(1) {
     //if((millis() - sleep_event_time) >= BUFFER_TIME) {
-      Serial.print("\nVALID TRIGGER EVENT, write to EEPROM");
-      ewrite1(0xFE);
+      Serial.print("\nVALID TRIGGER EVENT, write to EEPROM:");
+      ewrite1(0xA1);
     //}
     // go back to sleep
+    delay(1000);
     sleepUntilInterrupt();
   }
 }
