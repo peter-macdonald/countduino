@@ -1,24 +1,28 @@
 #include <EEPROM.h>
 #include <ARDUINO.h>
 #define MAGIC 0x42
+#define MAX_ADDR  1023
 
-int init_mem(byte flags){
-  if ( EEPROM.read(0) != MAGIC ){
-    set_cur_addr(3);
-    EEPROM.write(0,0x42);
-  }
+word cur_addr;
+
+int init_mem(){
+  cur_addr = 0;
+  while ( EEPROM.read(cur_addr) != 0xFF )
+  	cur_addr ++;
 }
 
 void set_cur_addr(word addr){
-  ewrite_word(addr,1);
+  cur_addr = addr;
   return;
 }
 
 word get_cur_addr(){
-  return eread_word(1);
+  return cur_addr;
 }
 
+
 word eread_word(int addr){
+  if ( addr > MAX_ADDR || addr < 0 ) return -1;
   word r = 0;
   byte in;
   in = EEPROM.read(addr);
@@ -29,6 +33,7 @@ word eread_word(int addr){
 }
 
 void ewrite_word(word data, int addr){
+  if ( addr > MAX_ADDR || addr < 0 ) return;
   Serial.print("\n[W] ADDR:");
   Serial.print(addr,HEX);
   Serial.print("\tDATA:");
@@ -42,6 +47,7 @@ void ewrite_word(word data, int addr){
 
 void ewrite1(byte data){
   word addr = get_cur_addr();
+  if ( addr > MAX_ADDR || addr < 0 ) return -1;
   Serial.print("\n[W] ADDR:");
   Serial.print(addr,HEX);
   Serial.print("\tDATA:");
