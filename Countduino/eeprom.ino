@@ -4,7 +4,8 @@
 
 int init_mem(byte flags){
   if ( EEPROM.read(0) != MAGIC ){
-    set_cur_addr(2);
+    set_cur_addr(3);
+    EEPROM.write(0,0x42);
   }
   else {
     set_cur_addr(get_cur_addr());
@@ -46,6 +47,6 @@ void ewrite1(byte data){
 void edump(){
   word i = 0;
   for( i=0; i < get_cur_addr(); i++ )
-    Serial.write(EEPROM.read(i));
+    Serial.print(EEPROM.read(i),HEX);
   return;
 }
