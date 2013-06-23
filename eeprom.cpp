@@ -35,5 +35,5 @@ void ewrite_word(word data, inta addr){
 	EEPROM.write( (byte)(data >> 8), addr + 1 );
 }
 
-
+/* Store mon, dom, hr, min */
 
