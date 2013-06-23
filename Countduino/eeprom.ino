@@ -42,3 +42,10 @@ void ewrite1(byte data){
   set_cur_addr(addr);
   return;
 }
+
+void edump(){
+  word i = 0;
+  for( i=0; i < get_cur_addr(); i++ )
+    Serial.write(EEPROM.read(i));
+  return;
+}
