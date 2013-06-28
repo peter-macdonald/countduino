@@ -2,15 +2,18 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <EEPROM.h>
+#include <DS1302>
 
 #define LED_PIN 13
 #define PIR_PIN 2
 #define PIR_INT 0
 #define BUFFER_TIME 15000
 
-// MAIN PROGRAM
+// GLOBAL VARS
 unsigned long sleep_event_time = 0; // capture time when wake up from sleep
 unsigned long elapsed_time = 0;  // time that have been awake for
+DS1302 rtc(2, 3, 4);  // initialize the DS1302 RTC on pins 2,3,4 (CE, IO, SCLK)
+Time t;
 
 // ISR to run when interrupted in Sleep Mode
 void pin2Interrupt() {/*no operation needed*/}
@@ -28,14 +31,50 @@ void sleepUntilInterrupt() {
   digitalWrite(LED_PIN, HIGH);          // indicate we are awake
 }
 
+void setup_RTC() {
+  // Set the clock to run-mode, and disable the write protection
+  rtc.halt(false);
+  rtc.writeProtect(false);
+
+   // COMMENT OUT BELOW ONCE CONFIGURED
+  rtc.setDOW(FRIDAY);        // Set Day-of-Week to FRIDAY
+  rtc.setTime(12, 0, 0);     // Set the time to 12:00:00 (24hr format)
+  rtc.setDate(6, 8, 2010);   // Set the date to August 6th, 2010
+
+  //@TODO: Should store the time truncation offset, and retrieve it.
+  rtc.writeProtect(true);
+}
+
+void write_compact_TS() {
+  // write a compacted timestamp to the EEPROM storage
+  t = rtc.getTime();
+  byte c_ts[3] = {0};
+
+  // layout:      [2]  [1] [0]
+  //             XMMM DDDH HHHM
+  //  where:
+  //    D0         first (true) or second half of the hour (false)
+  //    D1-D4      the number of the hour (1-12)
+  //    D5-D7      the number of the day (0-7)
+  //    D8-D11    the number of the month (1-12)
+
+  ((t.minute) <= 15) ? c_ts[0] = 0x01 : c_ts[0] = 0x00;
+  c_ts[0] | (t.hour << 1);
+  c_ts[1] = (t.hour >> 3);
+  c_ts[1] | ((t.day) << 1);  // NEED TO TAKE 1-31 MAP TO  1-7
+  c_ts[2] | (t.month);
+
+}
+
 void setup() {
   Serial.begin(9600); 
-  Serial.print("SLEEPING");
+  setup_RTC();
+
   pinMode(LED_PIN, OUTPUT);
   pinMode (PIR_PIN, INPUT);
   attachInterrupt(PIR_INT, pin2Interrupt, HIGH);
  
-  init_mem(0);
+  init_mem();
   //dump current logs to serial on startup
   edump();
   delay(50);
@@ -43,12 +82,13 @@ void setup() {
 
 void loop() {
   // start while asleep
+  Serial.print("SLEEPING");
   sleepUntilInterrupt();
   
   while(1) {
     //if((millis() - sleep_event_time) >= BUFFER_TIME) {
       Serial.print("\nVALID TRIGGER EVENT, write to EEPROM:");
-      ewrite1(0xA1);
+      //ewrite1(0xA1);
     //}
     // go back to sleep
     delay(1000);

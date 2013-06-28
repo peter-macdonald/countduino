@@ -45,7 +45,7 @@ void ewrite_word(word data, int addr){
   EEPROM.write(addr + 1, (byte)(data >> 8));
 }
 
-void ewrite1(byte data){
+int ewrite1(byte data){
   word addr = get_cur_addr();
   if ( addr > MAX_ADDR || addr < 0 ) return -1;
   Serial.print("\n[W] ADDR:");
@@ -56,7 +56,7 @@ void ewrite1(byte data){
   EEPROM.write(addr,data);
   addr ++;
   set_cur_addr(addr);
-  return;
+  return 0;
 }
 
 void edump(){
