@@ -48,21 +48,22 @@ void setup_RTC() {
 void write_compact_TS() {
   // write a compacted timestamp to the EEPROM storage
   t = rtc.getTime();
-  byte c_ts[3] = {0};
+  byte c_ts[2] = {0};
 
-  // layout:      [2]  [1] [0]
-  //             XMMM DDDH HHHM
+  // layout:     [1]-->lsb [0]-->lsb
+  //             MMMM DDDD HHHH MMMM
   //  where:
-  //    D0         first (true) or second half of the hour (false)
-  //    D1-D4      the number of the hour (1-12)
-  //    D5-D7      the number of the day (0-7)
-  //    D8-D11    the number of the month (1-12)
+  //    D0-D3      minutes / 12  (1-12)                4 bits
+  //    D4-D7      the number of the hour (1-12)       4 bits
+  //    D8-D11     the number of the day (1-7)         4 bits
+  //    D12-D16    the number of the month (1-12)      4 bits
+  //                                                  16 bits = 2 bytes 
 
-  ((t.minute) <= 15) ? c_ts[0] = 0x01 : c_ts[0] = 0x00;
-  c_ts[0] | (t.hour << 1);
-  c_ts[1] = (t.hour >> 3);
-  c_ts[1] | ((t.day) << 1);  // NEED TO TAKE 1-31 MAP TO  1-7
-  c_ts[2] | (t.month);
+  c_ts[0] | (t.min / 12) | ((t.hour)<<4);
+  c_ts[1] | (t.dow) | ((t.month)<<4);
+
+  ewrite1(c_ts[0]);
+  ewrite1(c_ts[1]);
 
 }
 
@@ -88,7 +89,7 @@ void loop() {
   while(1) {
     //if((millis() - sleep_event_time) >= BUFFER_TIME) {
       Serial.print("\nVALID TRIGGER EVENT, write to EEPROM:");
-      //ewrite1(0xA1);
+      write_compact_TS();
     //}
     // go back to sleep
     delay(1000);
