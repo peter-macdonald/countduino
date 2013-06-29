@@ -2,7 +2,7 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <EEPROM.h>
-#include <DS1302>
+#include <DS1302.h>
 
 #define LED_PIN 13
 #define PIR_PIN 2
@@ -13,7 +13,6 @@
 unsigned long sleep_event_time = 0; // capture time when wake up from sleep
 unsigned long elapsed_time = 0;  // time that have been awake for
 DS1302 rtc(2, 3, 4);  // initialize the DS1302 RTC on pins 2,3,4 (CE, IO, SCLK)
-Time t;
 
 // ISR to run when interrupted in Sleep Mode
 void pin2Interrupt() {/*no operation needed*/}
@@ -47,6 +46,7 @@ void setup_RTC() {
 
 void write_compact_TS() {
   // write a compacted timestamp to the EEPROM storage
+  Time t;
   t = rtc.getTime();
   byte c_ts[2] = {0};
 
@@ -60,7 +60,7 @@ void write_compact_TS() {
   //                                                  16 bits = 2 bytes 
 
   c_ts[0] | (t.min / 12) | ((t.hour)<<4);
-  c_ts[1] | (t.dow) | ((t.month)<<4);
+  c_ts[1] | (t.dow) | ((t.mon)<<4);
 
   ewrite1(c_ts[0]);
   ewrite1(c_ts[1]);
