@@ -53,18 +53,19 @@ void write_compact_TS() {
   // layout:     [1]-->lsb [0]-->lsb
   //             MMMM DDDD HHHH MMMM
   //  where:
-  //    D0-D3      minutes / 12  (1-12)                4 bits
+  //    D0-D3      minutes / 4   (0-15)                4 bits
   //    D4-D7      the number of the hour (1-12)       4 bits
   //    D8-D11     the number of the day (1-7)         4 bits
   //    D12-D16    the number of the month (1-12)      4 bits
   //                                                  16 bits = 2 bytes 
 
-  c_ts[0] | (t.min / 12) | ((t.hour)<<4);
-  c_ts[1] | (t.dow) | ((t.mon)<<4);
+  c_ts[0] = (t.min / 4) | ((t.hour)<<4);
+  c_ts[1] = (t.dow) | ((t.mon)<<4);
 
   ewrite1(c_ts[0]);
   ewrite1(c_ts[1]);
-
+  
+  return;
 }
 
 void setup() {
