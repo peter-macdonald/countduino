@@ -59,6 +59,10 @@ int ewrite1(byte data){
   return 0;
 }
 
+byte eread1(word addr){
+	return EEPROM.read(addr);
+}
+
 void edump(){
   int i = 0;
   int ending = get_cur_addr();

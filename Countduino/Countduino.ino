@@ -59,8 +59,8 @@ void write_compact_TS() {
   //    D12-D16    the number of the month (1-12)      4 bits
   //                                                  16 bits = 2 bytes 
 
-  c_ts[0] = (t.min / 4) | ((t.hour)<<4);
-  c_ts[1] = (t.dow) | ((t.mon)<<4);
+  c_ts[0] = ((t.min / 4)&0x0f) | ((t.hour)<<4);
+  c_ts[1] = ((t.dow)&0x0f) | ((t.mon)<<4);
 
   ewrite1(c_ts[0]);
   ewrite1(c_ts[1]);
