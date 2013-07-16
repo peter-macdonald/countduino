@@ -213,14 +213,19 @@ void setup() {
   delay(50);
   
   // Clear memeory (uncomment to clear, make sure to recomment!)
-  /*
+  
+  /*  
+  
   word last_addr;
   int i;
   last_addr = get_cur_addr();
   set_cur_addr(0);
   for (i = 0; i < last_addr; i++){
     ewrite1(0xFF);
-  }*/
+  }
+  
+  */
+  
   
   // Make it so that it doesn't trigger in the first 4 minutes
   Time t;
