@@ -60,8 +60,8 @@ void write_compact_TS() {
   // layout:     [1]-->lsb [0]-->lsb
   //             MMMM DDDD HHHH MMMM
   //  where:
-  //    D0-D3      minutes / 4   (0-15)                4 bits
-  //    D4-D7      the number of the hour (1-12)       4 bits
+  //    D0-D2      minutes / 10   (0-6)                4 bits
+  //    D3-D7      the number of the hour (1-24)       4 bits
   //    D8-D11     the number of the day (1-7)         4 bits
   //    D12-D16    the number of the month (1-12)      4 bits
   //                                                  16 bits = 2 bytes 
@@ -75,7 +75,7 @@ void write_compact_TS() {
   Serial.print(", Mon ");
   Serial.print(t.mon);
   
-  c_ts[0] = ((t.min / 4)&0x0f) | ((t.hour)<<4);
+  c_ts[0] = ((t.min / 10)&0x07) | ((t.hour)<<3);
   c_ts[1] = ((t.dow)&0x0f) | ((t.mon)<<4);
   
   if ( c_ts[0] != last_write_TS[0] || c_ts[1] != last_write_TS[1] ){
@@ -97,8 +97,8 @@ void read_compact_TS(word start_addr) {
   // layout:     [1]-->lsb [0]-->lsb
   //             MMMM DDDD HHHH MMMM
   //  where:
-  //    D0-D3      minutes / 4   (0-15)                4 bits
-  //    D4-D7      the number of the hour (1-12)       4 bits
+  //    D0-D2      minutes / 10   (0-6)                4 bits
+  //    D3-D7      the number of the hour (1-24)       4 bits
   //    D8-D11     the number of the day (1-7)         4 bits
   //    D12-D16    the number of the month (1-12)      4 bits
   //                                                  16 bits = 2 bytes 
@@ -106,8 +106,8 @@ void read_compact_TS(word start_addr) {
   c_ts[0] = eread1(start_addr);
   c_ts[1] = eread1(start_addr + 1);
 
-  minu = (c_ts[0] & 0x0F) * 4;
-  hr = ((c_ts[0]>>4) & 0x0F);
+  minu = (c_ts[0] & 0x07) * 10;
+  hr = ((c_ts[0]>>3) & 0x1F);
   day = (c_ts[1] & 0x0F);
   month = ((c_ts[1]>>4) & 0x0F);
   
@@ -208,29 +208,31 @@ void setup() {
   // Output the current time stamps as JSON
   output_as_JSON();
   
-  Serial.print("\n\n -------------  END OF JSON  -------------- \n\n");
+  Serial.println(" -------------  END OF JSON  -------------- ");
   
   delay(50);
   
   // Clear memeory (uncomment to clear, make sure to recomment!)
   
-  /*  
+   /**/
   
   word last_addr;
   int i;
   last_addr = get_cur_addr();
   set_cur_addr(0);
+  //last_addr = 0x3bb+1;
   for (i = 0; i < last_addr; i++){
     ewrite1(0xFF);
   }
+  set_cur_addr(0);
   
-  */
+  /**/
   
   
   // Make it so that it doesn't trigger in the first 4 minutes
   Time t;
   t = rtc.getTime();
-  last_write_TS[0] = ((t.min / 4)&0x0f) | ((t.hour)<<4);
+  last_write_TS[0] = ((t.min / 10)&0x07) | ((t.hour)<<3);
   last_write_TS[1] = ((t.dow)&0x0f) | ((t.mon)<<4);
   
 }
