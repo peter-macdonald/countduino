@@ -114,37 +114,18 @@ void read_compact_TS(word start_addr) {
   Serial.println("{");   // Start object
   
   Serial.print("\t\t\"Month\" : ");
-  switch (month){
-    case  1: Serial.println("\"Jan\" ,"); break;
-    case  2: Serial.println("\"Feb\" ,"); break;
-    case  3: Serial.println("\"Mar\" ,"); break;
-    case  4: Serial.println("\"Apr\" ,"); break;
-    case  5: Serial.println("\"May\" ,"); break;
-    case  6: Serial.println("\"Jun\" ,"); break;
-    case  7: Serial.println("\"Jul\" ,"); break;
-    case  8: Serial.println("\"Aug\" ,"); break;
-    case  9: Serial.println("\"Sep\" ,"); break;
-    case 10: Serial.println("\"Oct\" ,"); break;
-    case 11: Serial.println("\"Nov\" ,"); break;
-    case 12: Serial.println("\"Dec\" ,"); break;
-    default: Serial.println("\"Unknown\" ,");
-  }
+  Serial.print(month);
+  Serial.println(" ,");
+  // Jan is 1
   
   Serial.print("\t\t\"DOW\" : ");
-  switch (day){
-    case 1: Serial.println("\"Mon\" ,"); break;
-    case 2: Serial.println("\"Tue\" ,"); break;
-    case 3: Serial.println("\"Wed\" ,"); break;
-    case 4: Serial.println("\"Thu\" ,"); break;
-    case 5: Serial.println("\"Fri\" ,"); break;
-    case 6: Serial.println("\"Sat\" ,"); break;
-    case 7: Serial.println("\"Sun\" ,"); break;
-    default: Serial.println("\"Unknown\" ,");
-  }
+  Serial.print(day);
+  Serial.println(" ,");
+  // Monday is 1
   
   Serial.print("\t\t\"Hour\" : ");
   Serial.print(hr);
-  Serial.println(" , ");
+  Serial.println(" ,");
   
   Serial.print("\t\t\"Minute\" : ");
   Serial.print(minu);
