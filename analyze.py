@@ -3,13 +3,14 @@
 import argparse
 import json
 import numpy as np
-import matplotlib.pyplot as plt
 import datetime
 import serial
 import io
 import time
 import pdb
-
+import matplotlib.pyplot as plt
+import matplotlib.dates
+from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 
 YEAR = 2013
 DAYSOFWEEK = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
@@ -78,49 +79,48 @@ def auto_label(rects, axis):
 
 def make_plots(json_file):
 
-    metaData = dict.fromkeys(DAYSOFWEEK,{'ts_list':[],'avg_tod':0})
+    metaData = dict.fromkeys(DAYSOFWEEK)
     ind = np.arange(7)  # the x locations for the groups
     width = 0.35        # the width of the bars
+
+    #setup dict
+    for day in metaData:
+        metaData[day] = []
 
     # read in the supplied timestamp data and make data for each day
     with open(json_file, 'r') as infile:
         ts_json = json.load(infile)
 
-
+    # iterate through input JSON
     for ts in ts_json:
-    	day = ts_json[ts]['DOW'] - 1
+        dow = ts_json[ts]['DOW'] - 1
     	t = datetime.time(ts_json[ts]['Hour'], ts_json[ts]['Minute'],0)
-    	d = datetime.date(YEAR, ts_json[ts]['Month'], ts_json[ts]['DOW']) #I AM ABUSING DAY OF MONTH!
-    	metaData[DAYSOFWEEK[day]]['ts_list'] = datetime.datetime.combine(d, t) #.append(datetime.datetime.combine(d, t))
+    	d = datetime.date(YEAR, ts_json[ts]['Month'], ts_json[ts]['DOW'])
+        date = datetime.datetime.combine(d, t)
+        #@TODO: upgrade to a logger
+        print (date.strftime("Hit at: %H:%M:%S on %d/%m/%Y"))
+    	metaData[DAYSOFWEEK[dow]].append(date)
 
-    dayCumil=[]
+    #TIMELINE PLOT
+    trigger_times_list=[]
     for day in metaData:
-    	dayCumil.append(len(metaData[day]['ts_list']))
+        trigger_times_list.extend(metaData[day])
 
+    trigger_quantities_list = len(trigger_times_list) * [1]
 
-    # cumulative plot
-    fig_c, ax_c = plt.subplots()
-    rects_c = ax_c.bar(ind, dayCumil, width, color='r')
-
-    ax_c.set_ylabel('Number of Activations')
-    ax_c.set_title('Quantity of Activations per Day')
-    ax_c.set_xticks(ind+width)
-    ax_c.set_xticklabels( DAYSOFWEEK )
-
-    autolabel(rects_c, ax_c)
-
-    # median times plot
-    fig_m, ax_m = plt.subplots()
-    rects_m = ax_m.bar(ind, dayAvgs, width, color='b')
-
-    ax_m.set_ylabel('Time of Activation (24 hour)')
-    ax_m.set_title('Median Time of Activation versus Day')
-    ax_m.set_xticks(ind+width)
-    ax_m.set_xticklabels( DAYSOFWEEK )
-
-    auto_label(rects_m, ax_m)
+    fig, ax = plt.subplots()
+    ax.plot_date(trigger_times_list,trigger_quantities_list, 'ro')
+    ax.xaxis.set_major_locator( DayLocator() )
+    ax.xaxis.set_minor_locator( HourLocator() )
+    ax.xaxis.set_major_formatter( DateFormatter('%Y-%m-%d') )
+    ax.fmt_xdata = DateFormatter('%Y-%m-%d %H:%M:%S')
+    ax.xaxis.grid(True, which='minor') 
+    ax.autoscale_view()
+    plt.gcf().autofmt_xdate()
 
     plt.show()
+
+
 
 
 def main():
@@ -130,8 +130,7 @@ def main():
     args = parser.parse_args()
 
     dump_eeprom(args.tty, args.fout)
-    # still working on the plot feature
-    #make_plots(args.fout)
+    make_plots(args.fout)
 
 
 
