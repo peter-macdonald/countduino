@@ -67,13 +67,7 @@ void write_compact_TS() {
   //                                                  16 bits = 2 bytes 
   
   //Serial.print("Writing to eeprom theoretically: (min, dour, dow, mon)  ");
-  Serial.print(t.hour);
-  Serial.print(":");
-  Serial.print(t.min);
-  Serial.print(", DOW ");
-  Serial.print(t.dow);
-  Serial.print(", Mon ");
-  Serial.print(t.mon);
+
   
   c_ts[0] = ((t.min / 10)&0x07) | ((t.hour)<<3);
   c_ts[1] = ((t.dow)&0x0f) | ((t.mon)<<4);
@@ -84,6 +78,17 @@ void write_compact_TS() {
     
     ewrite1(c_ts[0]);
     ewrite1(c_ts[1]);
+    
+    Serial.print(t.hour);
+    Serial.print(":");
+    Serial.print(t.min);
+    Serial.print(", DOW ");
+    Serial.print(t.dow);
+    Serial.print(", Mon ");
+    Serial.print(t.mon);
+    
+  } else {
+    Serial.println(" ...Not written");
   }
   
   return;
@@ -113,25 +118,25 @@ void read_compact_TS(word start_addr) {
   
   Serial.println("{");   // Start object
   
-  Serial.print("\t\t\"Month\" : ");
+  Serial.print("\"Month\":");
   Serial.print(month);
-  Serial.println(" ,");
+  Serial.println(",");
   // Jan is 1
   
-  Serial.print("\t\t\"DOW\" : ");
+  Serial.print("\"DOW\":");
   Serial.print(day);
-  Serial.println(" ,");
+  Serial.println(",");
   // Monday is 1
   
-  Serial.print("\t\t\"Hour\" : ");
+  Serial.print("\"Hour\":");
   Serial.print(hr);
-  Serial.println(" ,");
+  Serial.println(",");
   
-  Serial.print("\t\t\"Minute\" : ");
+  Serial.print("\"Minute\":");
   Serial.print(minu);
-  Serial.println("");
+  Serial.print("");
   
-  Serial.println("\t}");   // End object
+  Serial.println("}");   // End object
   
   /*
   Serial.print("TimeStamp: ");
@@ -174,7 +179,7 @@ void output_as_JSON(){
 
 void setup() {
   // Initializations
-  Serial.begin(9600); 
+  Serial.begin(115200); 
   setup_RTC();
   init_mem();
   
@@ -183,19 +188,17 @@ void setup() {
   pinMode (PIR_PIN, INPUT);
   attachInterrupt(PIR_INT, pin2Interrupt, HIGH);
  
-  //Output raw memeory of used section on startup
-  //edump();
+  Serial.println(" -------------  STARTJSON  -------------- ");
   
   // Output the current time stamps as JSON
   output_as_JSON();
   
-  Serial.println(" -------------  END OF JSON  -------------- ");
+  Serial.println(" -------------  ENDJSON  -------------- ");
   
   delay(50);
   
-  // Clear memeory (uncomment to clear, make sure to recomment!)
-  
-   /**/
+  // Clear memeory (uncomment to clear, make sure to recomment!) ONLY DO THIS IF WANT TO, USER CONTROL
+   /*
   
   word last_addr;
   int i;
@@ -228,7 +231,6 @@ void loop() {
     write_compact_TS();
       
     // go back to sleep
-    delay(1000);
     sleepUntilInterrupt();
   }
 }
