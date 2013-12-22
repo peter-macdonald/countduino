@@ -125,11 +125,18 @@ def make_plots(json_file):
 
 def main():
     parser = argparse.ArgumentParser(description='a parser for EEPROM security monitors')
+    parser.add_argument('--download', action='store_true', required=False)
     parser.add_argument('--tty', type=str, help='the tty of your countduino')
     parser.add_argument('--fout', type=str, required=False, default='/var/tmp/time.json', help='the location of your graphs and EEPROM dump')
     args = parser.parse_args()
 
-    dump_eeprom(args.tty, args.fout)
+    if(args.download and args.tty is None):
+        print "must specify a \"tty [/dev/tty...]\""
+        return
+
+    if (args.download):
+        dump_eeprom(args.tty, args.fout)
+    
     make_plots(args.fout)
 
 

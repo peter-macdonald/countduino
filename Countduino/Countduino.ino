@@ -40,9 +40,9 @@ void setup_RTC() {
   
   rtc.writeProtect(false);
 
-  rtc.setDOW(TUESDAY);        // Set Day-of-Week to SATURDAY
-  rtc.setTime(9, 46, 00);     // Set the time to 12:01:15 (24hr format)
-  rtc.setDate(15, 7, 2013);   // Set the date to August 6th, 2010
+  rtc.setDOW(SATURDAY);        // Set Day-of-Week to SATURDAY
+  rtc.setTime(22, 42, 00);     // Set the time to 12:01:15 (24hr format)
+  rtc.setDate(12, 21, 2013);   // Set the date to August 6th, 2010
 
   //@TODO: Should store the time truncation offset, and retrieve it.
   rtc.writeProtect(true);
@@ -137,19 +137,6 @@ void read_compact_TS(word start_addr) {
   Serial.print("");
   
   Serial.println("}");   // End object
-  
-  /*
-  Serial.print("TimeStamp: ");
-  Serial.print(mon);
-  Serial.print(" month, ");
-  Serial.print(day);
-  Serial.print(" day of week, at about ");
-  Serial.print(hour);
-  Serial.print(":"); 
-  Serial.print(minu);
-  Serial.print(" (+-4 min)\n");
-  */
-
   return;
 }
 
