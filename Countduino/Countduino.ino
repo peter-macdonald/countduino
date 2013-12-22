@@ -40,9 +40,9 @@ void setup_RTC() {
   
   rtc.writeProtect(false);
 
-  rtc.setDOW(TUESDAY);        // Set Day-of-Week to SATURDAY
-  rtc.setTime(9, 46, 00);     // Set the time to 12:01:15 (24hr format)
-  rtc.setDate(15, 7, 2013);   // Set the date to August 6th, 2010
+  rtc.setDOW(SATURDAY);        // Set Day-of-Week to SATURDAY
+  rtc.setTime(22, 42, 00);     // Set the time to 12:01:15 (24hr format)
+  rtc.setDate(12, 21, 2013);   // Set the date to August 6th, 2010
 
   //@TODO: Should store the time truncation offset, and retrieve it.
   rtc.writeProtect(true);
@@ -67,13 +67,7 @@ void write_compact_TS() {
   //                                                  16 bits = 2 bytes 
   
   //Serial.print("Writing to eeprom theoretically: (min, dour, dow, mon)  ");
-  Serial.print(t.hour);
-  Serial.print(":");
-  Serial.print(t.min);
-  Serial.print(", DOW ");
-  Serial.print(t.dow);
-  Serial.print(", Mon ");
-  Serial.print(t.mon);
+
   
   c_ts[0] = ((t.min / 10)&0x07) | ((t.hour)<<3);
   c_ts[1] = ((t.dow)&0x0f) | ((t.mon)<<4);
@@ -84,6 +78,17 @@ void write_compact_TS() {
     
     ewrite1(c_ts[0]);
     ewrite1(c_ts[1]);
+    
+    Serial.print(t.hour);
+    Serial.print(":");
+    Serial.print(t.min);
+    Serial.print(", DOW ");
+    Serial.print(t.dow);
+    Serial.print(", Mon ");
+    Serial.print(t.mon);
+    
+  } else {
+    Serial.println(" ...Not written");
   }
   
   return;
@@ -113,57 +118,25 @@ void read_compact_TS(word start_addr) {
   
   Serial.println("{");   // Start object
   
-  Serial.print("\t\t\"Month\" : ");
-  switch (month){
-    case  1: Serial.println("\"Jan\" ,"); break;
-    case  2: Serial.println("\"Feb\" ,"); break;
-    case  3: Serial.println("\"Mar\" ,"); break;
-    case  4: Serial.println("\"Apr\" ,"); break;
-    case  5: Serial.println("\"May\" ,"); break;
-    case  6: Serial.println("\"Jun\" ,"); break;
-    case  7: Serial.println("\"Jul\" ,"); break;
-    case  8: Serial.println("\"Aug\" ,"); break;
-    case  9: Serial.println("\"Sep\" ,"); break;
-    case 10: Serial.println("\"Oct\" ,"); break;
-    case 11: Serial.println("\"Nov\" ,"); break;
-    case 12: Serial.println("\"Dec\" ,"); break;
-    default: Serial.println("\"Unknown\" ,");
-  }
+  Serial.print("\"Month\":");
+  Serial.print(month);
+  Serial.println(",");
+  // Jan is 1
   
-  Serial.print("\t\t\"DOW\" : ");
-  switch (day){
-    case 1: Serial.println("\"Mon\" ,"); break;
-    case 2: Serial.println("\"Tue\" ,"); break;
-    case 3: Serial.println("\"Wed\" ,"); break;
-    case 4: Serial.println("\"Thu\" ,"); break;
-    case 5: Serial.println("\"Fri\" ,"); break;
-    case 6: Serial.println("\"Sat\" ,"); break;
-    case 7: Serial.println("\"Sun\" ,"); break;
-    default: Serial.println("\"Unknown\" ,");
-  }
-  
-  Serial.print("\t\t\"Hour\" : ");
-  Serial.print(hr);
-  Serial.println(" , ");
-  
-  Serial.print("\t\t\"Minute\" : ");
-  Serial.print(minu);
-  Serial.println("");
-  
-  Serial.println("\t}");   // End object
-  
-  /*
-  Serial.print("TimeStamp: ");
-  Serial.print(mon);
-  Serial.print(" month, ");
+  Serial.print("\"DOW\":");
   Serial.print(day);
-  Serial.print(" day of week, at about ");
-  Serial.print(hour);
-  Serial.print(":"); 
+  Serial.println(",");
+  // Monday is 1
+  
+  Serial.print("\"Hour\":");
+  Serial.print(hr);
+  Serial.println(",");
+  
+  Serial.print("\"Minute\":");
   Serial.print(minu);
-  Serial.print(" (+-4 min)\n");
-  */
-
+  Serial.print("");
+  
+  Serial.println("}");   // End object
   return;
 }
 
@@ -193,7 +166,7 @@ void output_as_JSON(){
 
 void setup() {
   // Initializations
-  Serial.begin(9600); 
+  Serial.begin(115200); 
   setup_RTC();
   init_mem();
   
@@ -202,19 +175,17 @@ void setup() {
   pinMode (PIR_PIN, INPUT);
   attachInterrupt(PIR_INT, pin2Interrupt, HIGH);
  
-  //Output raw memeory of used section on startup
-  //edump();
+  Serial.println(" -------------  STARTJSON  -------------- ");
   
   // Output the current time stamps as JSON
   output_as_JSON();
   
-  Serial.println(" -------------  END OF JSON  -------------- ");
+  Serial.println(" -------------  ENDJSON  -------------- ");
   
   delay(50);
   
-  // Clear memeory (uncomment to clear, make sure to recomment!)
-  
-   /**/
+  // Clear memeory (uncomment to clear, make sure to recomment!) ONLY DO THIS IF WANT TO, USER CONTROL
+   /*
   
   word last_addr;
   int i;
@@ -247,7 +218,6 @@ void loop() {
     write_compact_TS();
       
     // go back to sleep
-    delay(1000);
     sleepUntilInterrupt();
   }
 }
